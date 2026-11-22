@@ -1,0 +1,57 @@
+# OS and editor files
+.DS_Store
+._*
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# Rust build and profiling output
+target/
+*.profraw
+*.profdata
+
+# Frontend dependencies, builds, and caches
+node_modules/
+/web/dist/
+.vite/
+*.tsbuildinfo
+
+# Test and coverage output
+/coverage/
+/web/coverage/
+playwright-report/
+test-results/
+
+# Local environment files; keep distributable templates
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.template
+!.env.*.template
+
+# Machine-specific configuration and generated AS credentials
+/m3.local.yaml
+/m3.local.yml
+/m3.local.toml
+/m3-registration.yaml
+/deploy/m3-registration.yaml
+/compose.override.yaml
+/compose.override.yml
+/docker-compose.override.yaml
+/docker-compose.override.yml
+
+# Local runtime data, device stores, secrets, and backups
+/.local/
+/data/
+/runtime/
+/volumes/
+/secrets/
+/credentials/
+/backups/
+*.log
+
+# Keep Cargo.lock, package-lock.json, SQLx offline metadata (.sqlx/),
+# exported API contracts, generated frontend types, and verification reports.
