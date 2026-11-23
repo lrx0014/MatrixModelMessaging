@@ -84,3 +84,6 @@ mod tests {
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 }
+
+pub mod appservice;
+pub mod provision;

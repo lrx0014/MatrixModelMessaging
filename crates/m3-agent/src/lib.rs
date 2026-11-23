@@ -98,3 +98,8 @@ mod tests {
         super::storage_smoke().await.unwrap();
     }
 }
+
+pub mod console;
+pub mod matrix;
+pub mod probe;
+mod probe_transport;

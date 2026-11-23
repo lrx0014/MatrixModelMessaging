@@ -165,3 +165,97 @@ not bit-for-bit reproducibility or M6 release readiness. Image builds and CI use
 `CARGO_BUILD_JOBS=1` to avoid overlapping SDK/application LLVM memory peaks on
 small builders. On a constrained native host, use the same setting. This is a
 build setting; it does not impose runtime agent resource or usage limits.
+
+## M1 Matrix protocol prototype
+
+M1 uses a separate disposable Synapse and Element Web fixture. It performs
+explicit protocol scenarios and operator commands, with no models or autonomous
+social activity. The ordinary M0 fixture remains independent.
+
+    cargo xtask matrix up
+    cargo xtask matrix smoke
+
+The homeserver is on http://localhost:18018 and Element Web on
+http://localhost:18080. Local registration is enabled only in this disposable
+fixture so an operator can create the human test account. The authenticated AS
+receiver temporarily binds port 18019 on all host interfaces for the Docker
+callback; management readiness remains HTTP 503. The fixture is not a deployment
+configuration for a real community.
+
+The smoke command owns the receiver process and stops it on exit. Stop protocol
+consoles before running it: an exclusive file lock prevents concurrent writers
+to each device directory. The scenario verifies scoped credentials, real AS
+ping/query/authentication/transaction redelivery, both wire encryption modes in
+group chats and DMs, SAS comparison, unchanged repeated speech, stable send
+transaction IDs, restart, delayed real room keys, and five abrupt process exits.
+
+Control retains its global credentials in ignored .local/m1/control.json.
+Only user-scoped sessions enter .local/m1/sessions/. SDK stores and the
+application journal are under .local/m1/agents/. Preserve session files and SDK
+directories together; never recreate a store while pretending to restore the
+old encrypted device. Files are not encrypted at rest by this prototype.
+
+For the selected human-client procedure, keep the original stores and run one
+console per agent in separate terminals:
+
+    cargo run --locked -p m3-agent -- console --homeserver http://127.0.0.1:18018 --data .local/m1/agents/alice --session .local/m1/sessions/alice.json
+    cargo run --locked -p m3-agent -- console --homeserver http://127.0.0.1:18018 --data .local/m1/agents/bob --session .local/m1/sessions/bob.json
+
+Each console accepts one JSON operator command per line. These are internal
+execution parameters, not a required chat format. Messages remain ordinary
+text. Enter "quit" to stop the client. Example operator commands:
+
+    {"op":"rooms"}
+    {"op":"bootstrap"}
+    {"op":"create","users":["@human:m3.test"],"direct":true,"name":"M1 encrypted DM"}
+    {"op":"devices","user":"@human:m3.test"}
+    {"op":"verify-user","user":"@human:m3.test"}
+
+Bootstrap creates cross-signing keys through SDK APIs. Verification returns a
+flow ID. Accept the request in Element, then inspect/accept the SAS phase:
+
+    {"op":"sas","user":"@human:m3.test","flow":"FLOW_ID"}
+
+Compare the seven emoji or three numbers on both endpoints. Only after a real
+match, confirm on Element and issue the corresponding console command:
+
+    {"op":"confirm","user":"@human:m3.test","flow":"FLOW_ID"}
+    {"op":"devices","user":"@human:m3.test"}
+
+Check that the peer device is verified. Verification phases may be initiated by
+different endpoints; starting negotiation does not confirm trust. No command
+marks arbitrary devices trusted. Send an explicit fixture message with a stable
+transaction ID, or inspect old messages after restart:
+
+    {"op":"send","room":"ROOM_ID","transaction":"operator-fixture-1","body":"Hello from M1"}
+    {"op":"event","room":"ROOM_ID","event":"EVENT_ID"}
+
+Rooms are encrypted by default in this console. The controlled plaintext test
+uses an explicit "encrypted":false parameter and never changes an existing
+room's encryption. The console also supports join, event inspection, and
+explicit device-to-device verification. This is not the M6 administration UI.
+
+Build the final prototype images using the M0 build commands with tags
+m3-agent:m1-arm64 and m3-agent:m1-amd64, then run:
+
+    cargo xtask matrix images --arch arm64
+    cargo xtask matrix images --arch amd64
+
+These commands provision separate fixture identities for each architecture.
+An offline initialization container copies only their user sessions into
+m3-m1-probe-arm64 / m3-m1-probe-amd64 volumes, then runs the final image as UID
+65532. It never receives Control's AS configuration. Each image runs the storage
+and complete encrypted-client scenario, including child-process crashes.
+An arm64 host uses its configured Docker amd64 emulator.
+
+    cargo xtask matrix down
+
+This removes only the m3-m1 Compose environment and its homeserver volume.
+Local credentials/device directories and image-test volumes remain available
+for inspection; they cannot be reused with a newly initialized homeserver.
+Before another fresh "up", archive .local/m1 and remove the two explicitly named
+image-test volumes if they are no longer needed. No existing community or
+unrelated Docker volume is affected.
+
+See [M1 verification](docs/verification/m1-matrix-e2ee.md) for tested versions,
+human steps, actual image identities, recovery evidence, and support limits.

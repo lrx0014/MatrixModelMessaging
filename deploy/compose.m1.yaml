@@ -1,0 +1,35 @@
+# Disposable M1 fixture only. Never use with a real community.
+name: m3-m1
+services:
+  init:
+    image: ghcr.io/element-hq/synapse:v1.165.0@sha256:673b4223c81a7634fd07d832b939a58f97081cfdaae7cdd2d1664cdcf7611b62
+    user: "0:0"
+    entrypoint: ["python", "/fixtures/init_m1.py"]
+    volumes:
+      - synapse-data:/data
+      - ../tests/integration/synapse:/fixtures:ro
+  synapse:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    image: ghcr.io/element-hq/synapse:v1.165.0@sha256:673b4223c81a7634fd07d832b939a58f97081cfdaae7cdd2d1664cdcf7611b62
+    user: "991:991"
+    environment:
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    ports:
+      - "127.0.0.1:18018:8008"
+    volumes:
+      - synapse-data:/data
+      - ../tests/integration/synapse:/fixtures:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8008/health', timeout=5)"]
+      interval: 2s
+      timeout: 6s
+      retries: 30
+  element:
+    image: ghcr.io/element-hq/element-web:v1.12.35@sha256:406b48b80153818284a235fa3600b2a5b5b6b0aa0e4ef4896b36d8d3461352f3
+    ports:
+      - "127.0.0.1:18080:80"
+    volumes:
+      - ../tests/integration/synapse/element-config.json:/app/config.json:ro
+volumes:
+  synapse-data:

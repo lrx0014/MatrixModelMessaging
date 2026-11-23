@@ -1,0 +1,11 @@
+{
+  "default_server_config": {"m.homeserver": {"base_url": "http://localhost:18018", "server_name": "m3.test"}},
+  "disable_custom_urls": true,
+  "disable_guests": true,
+  "brand": "M3 Local Protocol Test",
+  "integrations_ui_url": "",
+  "integrations_rest_url": "",
+  "integrations_widgets_urls": [],
+  "room_directory": {"servers": ["m3.test"]},
+  "default_theme": "light"
+}

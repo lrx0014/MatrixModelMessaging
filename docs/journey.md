@@ -118,3 +118,51 @@ This is a development/build setting, not a runtime resource or social usage
 limit. Keep failed/canceled attempts separate from passing architecture evidence.
 Revisit the job count only after measuring the compiler's memory peaks on a
 larger builder. See [M0 evidence](verification/m0-foundation.md) for results.
+
+### J004 — 2026-11-23 — Journal Client-Server input before SDK cursor advancement
+
+Status: Resolved for the pinned M1 protocol prototype
+Related milestone: M1
+
+SDK 0.18.0 processes crypto/state and saves its sync cursor before returning to
+the caller. It also suppresses a response with an already-seen next_batch.
+An application callback alone therefore cannot make a separate SQLx inbox
+atomic with SDK state: a restart can skip events the application never saved.
+
+The Runner's local transport gateway commits raw timeline events and a batch
+ledger before returning sync to the SDK. It backfills limited timelines through
+public history pagination without changing the response delivered to the SDK.
+The application explicitly supplies its own last committed cursor. Retained
+ciphertext is decrypted through SDK room APIs and deduplicated by event ID;
+pending-key rows also remain durable before the application checkpoint advances.
+
+The M1 process-exit suite covers journal, SDK, decryption, inbox, and checkpoint
+boundaries. The delayed-key fixture retains actual to-device packets and releases
+them with a fresh real server batch: inserting packets into an unchanged
+next_batch would correctly trip the SDK replay guard and would be an invalid
+fault fixture. SDK room-key notifications, rather than the processed sync
+to-device list alone, trigger deferred-decryption retries.
+
+Revisit the gateway when the SDK provides a public durable handoff interface
+that can replace it. Rerun the full encryption/recovery suite before changing
+the boundary. This does not authorize an SDK fork or handwritten crypto.
+See [M1 evidence](verification/m1-matrix-e2ee.md).
+
+### J005 — 2026-11-23 — Distinguish request initiation from SAS negotiation
+
+Status: Resolved
+Related milestone: M1
+
+The first operator console gated SAS acceptance on the request initiator.
+Element could start the SAS phase after M3 requested verification; the console
+then left Element waiting because those two initiation roles are different.
+
+The console now invokes the SDK's idempotent SAS acceptance operation, which
+negotiates only an appropriate started phase. It never confirms a comparison
+or marks a device trusted automatically. Confirmation still follows a real
+emoji/number comparison on both endpoints. The shared helper is exercised with
+the peer starting SAS after the other client initiated the request.
+
+The human Element test completed the corrected flow, and the verified peer
+device status survived reopening the original SDK store. See
+[M1 evidence](verification/m1-matrix-e2ee.md) for the exact tested client scope.

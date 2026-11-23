@@ -1,4 +1,5 @@
 mod database;
+mod matrix;
 
 use std::{
     fs,
@@ -37,6 +38,11 @@ enum Command {
     DriftTest,
     /// Run the same deterministic checks used by CI (requires pinned Node/npm).
     Verify,
+    /// Manage the separate local M1 protocol and Element fixture.
+    Matrix {
+        #[command(subcommand)]
+        action: matrix::Action,
+    },
     /// Manage only the disposable m3-m0 Compose project.
     Synapse {
         #[command(subcommand)]
@@ -161,6 +167,7 @@ async fn reject_mutation(path: &Path, checker: &str) -> anyhow::Result<()> {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     match Args::parse().command {
+        Command::Matrix { action } => matrix::execute(action).await?,
         Command::Openapi { check } => openapi(check)?,
         Command::Sqlx { check } => database::prepare(check).await?,
         Command::Contracts { check } => {

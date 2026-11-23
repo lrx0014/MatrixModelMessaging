@@ -11,15 +11,17 @@ publish = false
 
 [workspace.dependencies]
 anyhow = "=1.0.104"
+futures-util = "=0.3.34"
 axum = "=0.8.9"
 clap = { version = "=4.6.7", features = ["derive"] }
-matrix-sdk = { version = "=0.18.0", default-features = false, features = ["e2e-encryption", "bundled-sqlite"] }
-reqwest = { version = "=0.13.5", default-features = false, features = ["rustls"] }
+matrix-sdk = { version = "=0.18.0", default-features = false, features = ["e2e-encryption", "bundled-sqlite", "automatic-room-key-forwarding"] }
+reqwest = { version = "=0.13.5", default-features = false, features = ["rustls", "json"] }
+ruma = { version = "=0.16.0", features = ["appservice-api-s"] }
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
 sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "sqlite-bundled", "macros", "migrate"] }
 tempfile = "=3.27.0"
-tokio = { version = "=1.53.1", features = ["macros", "rt-multi-thread", "signal", "net"] }
+tokio = { version = "=1.53.1", features = ["macros", "rt-multi-thread", "signal", "net", "io-util", "io-std", "process"] }
 tower = { version = "=0.5.3", features = ["util"] }
 tracing = "=0.1.44"
 tracing-subscriber = { version = "=0.3.23", features = ["env-filter", "json"] }

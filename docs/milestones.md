@@ -30,12 +30,13 @@ For each milestone, record the tested commit, exact commands or manual steps, en
 The M0 Rust foundation is complete. The workspace, minimal binaries, storage,
 contracts, disposable homeserver, CI checks, and both Linux architecture images
 have passed the [M0 acceptance checks](verification/m0-foundation.md).
-No Matrix social runtime is implemented yet.
+M1 now has a controlled Matrix/E2EE prototype; final architecture acceptance is
+in progress. No model-driven social runtime is implemented yet.
 
 | ID | Milestone | Design phase | Depends on | Status | Completed |
 | --- | --- | --- | --- | --- | --- |
 | M0 | Reproducible Rust foundation | Phase 0, setup | Documentation baseline | Complete | 2026-11-23 |
-| M1 | Independent encrypted Matrix clients | Phase 0, protocol validation | M0 | Not started | — |
+| M1 | Independent encrypted Matrix clients | Phase 0, protocol validation | M0 | In progress | — |
 | M2 | Persistent identities and managed containers | Phase 1 | M1 | Not started | — |
 | M3 | Natural-language social loop and manual brake | Phase 2 | M2 | Not started | — |
 | M4 | Personal long-term memory and growth | Phase 3 | M3 | Not started | — |
@@ -95,25 +96,30 @@ Hosted GitHub Actions execution has not been run.
 
 ### Implementation checklist
 
-- [ ] M1-I1: Generate an AS registration with the local AI namespace and implement authenticated transaction, query, and ping handling with Ruma/Axum.
-- [ ] M1-I2: Implement AS account creation and obtain usable user-scoped device sessions without distributing the global AS token to Runners.
-- [ ] M1-I3: Start two clients using distinct MXIDs, device identities, and SDK-owned persistent stores.
-- [ ] M1-I4: Use ordinary Client-Server sync as the single chat-processing source; keep AS pushes from causing duplicate inference.
-- [ ] M1-I5: Implement prototype encrypted messaging, device-verification diagnostics, and missing-key handling through SDK APIs.
-- [ ] M1-I6: Implement recoverable event handoff/checkpoint behavior or a durable replay layer where SDK interfaces require it.
-- [ ] M1-I7: Document the verified server, authentication, SDK, and human-client combination and any concrete limitations.
+- [x] M1-I1: Generate an AS registration with the local AI namespace and implement authenticated transaction, query, and ping handling with Ruma/Axum.
+- [x] M1-I2: Implement AS account creation and obtain usable user-scoped device sessions without distributing the global AS token to Runners.
+- [x] M1-I3: Start two clients using distinct MXIDs, device identities, and SDK-owned persistent stores.
+- [x] M1-I4: Use ordinary Client-Server sync as the single chat-processing source; keep AS pushes from causing duplicate inference.
+- [x] M1-I5: Implement prototype encrypted messaging, device-verification diagnostics, and missing-key handling through SDK APIs.
+- [x] M1-I6: Implement recoverable event handoff/checkpoint behavior or a durable replay layer where SDK interfaces require it.
+- [x] M1-I7: Document the verified server, authentication, SDK, and human-client combination and any concrete limitations.
 
 ### Acceptance checklist
 
-- [ ] M1-A1: Both users exchange unencrypted and encrypted group messages and DMs bidirectionally, including with the selected human client.
-- [ ] M1-A2: Device verification succeeds through a documented procedure; no blanket trust of unknown devices or plaintext fallback is needed.
-- [ ] M1-A3: Restart both clients from their original stores; verify unchanged MXIDs/device fingerprints, old-message decryption, and new encrypted messages.
-- [ ] M1-A4: A missing-key event remains diagnosable and is not interpreted by the model; when a key arrives, it enters processing once.
-- [ ] M1-A5: Fault injection around decryption, inbox persistence, and cursor advancement demonstrates recovery without lost input or duplicate effective delivery.
-- [ ] M1-A6: AS transaction redelivery and client-sync replay do not create duplicate chat processing.
+- [x] M1-A1: Both users exchange unencrypted and encrypted group messages and DMs bidirectionally, including with the selected human client.
+- [x] M1-A2: Device verification succeeds through a documented procedure; no blanket trust of unknown devices or plaintext fallback is needed.
+- [x] M1-A3: Restart both clients from their original stores; verify unchanged MXIDs/device fingerprints, old-message decryption, and new encrypted messages.
+- [x] M1-A4: A missing-key event remains diagnosable and is not interpreted by the model; when a key arrives, it enters processing once.
+- [x] M1-A5: Fault injection around decryption, inbox persistence, and cursor advancement demonstrates recovery without lost input or duplicate effective delivery.
+- [x] M1-A6: AS transaction redelivery and client-sync replay do not create duplicate chat processing.
 - [ ] M1-A7: The final prototype image exercises SDK and SQLx stores on both target architectures; record encrypted-client smoke results.
 
-**Evidence:** `docs/verification/m1-matrix-e2ee.md`, with reproducible setup, session/verification steps, public device fingerprints where appropriate, recovery scenarios, and the initial compatibility matrix.
+**Evidence:** [M1 Matrix/E2EE verification](verification/m1-matrix-e2ee.md),
+with reproducible setup, human Element comparison, public device fingerprints,
+real delayed-key and process-crash scenarios, and the tested compatibility scope.
+
+**Status:** All implementation items and host/human acceptance checks pass.
+Final arm64/amd64 prototype image acceptance (M1-A7) is in progress.
 
 **Gate:** The selected Rust client/AS architecture works with independent persistent encrypted identities. Resolve credential or recovery failures before proceeding; do not substitute shared keys, global AS tokens in every container, or disabled encryption.
 
@@ -342,13 +348,12 @@ version conflict was resolved by the compatible pins documented in
 [M0 evidence](verification/m0-foundation.md) and [J001](journey.md#j001--2026-11-23--select-sdk-and-sqlx-by-their-shared-native-sqlite-dependency).
 Protocol and recovery risks remain unverified.
 
-**Next milestone:** M1 — independent encrypted Matrix clients. Begin controlled
-AS account/session provisioning and authenticated transaction handling, then
-validate verification, encrypted messaging, and persistent recovery against a
-real homeserver and human client before expanding product features.
+**Current work:** Complete M1-A7 by running the complete encrypted-client and
+recovery scenario inside the final images on both architectures. M2 follows
+only after that protocol gate passes.
 
 | Item | Milestone | Concrete obstacle or pending decision | Evidence | Next action |
 | --- | --- | --- | --- | --- |
-| — | M1 | No active implementation blocker; protocol gates remain unverified | [M0 evidence](verification/m0-foundation.md) | Begin M1-I1 and controlled provisioning validation |
+| — | M1 | No active blocker; final image acceptance is running | [M1 evidence](verification/m1-matrix-e2ee.md) | Complete M1-A7 |
 
 Keep this table focused on actionable obstacles. General technical validation remains in design Section 16 and the milestone checklists rather than being mislabeled as an observed failure.

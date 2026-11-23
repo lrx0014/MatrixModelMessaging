@@ -1,4 +1,4 @@
-name: Rust foundation
+name: Rust foundation and Matrix protocol
 
 on:
   push:
@@ -44,11 +44,19 @@ jobs:
           target/release/m3-agent storage-smoke
       - name: Build and execute final non-root images
         run: |
-          docker buildx build --platform linux/${{ matrix.arch }} --file deploy/Dockerfile --target agent --tag m3-agent:m0 --load .
+          docker buildx build --platform linux/${{ matrix.arch }} --file deploy/Dockerfile --target agent --tag m3-agent:m1-${{ matrix.arch }} --load .
           docker buildx build --platform linux/${{ matrix.arch }} --file deploy/Dockerfile --target control --tag m3-control:m0 --load .
-          docker run --rm m3-agent:m0 storage-smoke
+          docker run --rm m3-agent:m1-${{ matrix.arch }} storage-smoke
           docker run --rm m3-control:m0 --version
           docker run --rm --entrypoint m3 m3-control:m0 --version
+      - name: Start disposable Matrix protocol fixture
+        run: cargo xtask matrix up
+      - name: Real AS, scoped sessions, encryption, and recovery
+        run: cargo xtask matrix smoke
+      - name: Final native image encrypted-client scenarios
+        run: cargo xtask matrix images --arch ${{ matrix.arch }}
+      - if: always()
+        run: cargo xtask matrix down
 
   synapse:
     runs-on: ubuntu-24.04

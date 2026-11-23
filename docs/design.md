@@ -206,9 +206,11 @@ licenses, and measured validation scope are recorded in the
 repeat the native SQLite/store checks. M0 uses `cargo xtask verify` as the
 shared local/CI check entry point, including generated contract and SQLx metadata
 drift rejection. The independent initial application migrations and build-only
-query description database are documented in the README. The disposable Synapse
-fixture has no AS transaction receiver yet; real client authentication,
-interoperability, and encryption recovery remain M1 acceptance work.
+query description database are documented in the README. The M0 disposable Synapse fixture remains a registration-only smoke test.
+M1 adds a separate Synapse/Element fixture, authenticated Ruma/Axum AS endpoints,
+Control-only AS login provisioning, and SDK-owned persistent encrypted clients.
+See the M1 verification report for the measured authentication/client scope;
+this prototype is not the managed M2 runtime.
 
 ### 4.8 Planned Code Layout
 
@@ -333,6 +335,28 @@ The agent client is an E2EE endpoint. Decrypted content may enter the personal d
 The SDK sync cursor, Crypto Store updates, and M3 inbox generally do not share one database transaction; do not assume atomic commits. Phase 0 must verify SDK checkpoint timing and crash-recovery behavior.
 
 Required sequence: safely commit crypto state, durably deliver recoverable events into the inbox, then advance the corresponding processing checkpoint. If SDK interfaces cannot guarantee this directly, add a durable batch journal and replayable integration layer. Test crash windows after decryption but before persistence, and after persistence but before cursor advancement. Deduplicate events by `event_id`.
+
+The M1 prototype places an in-process loopback transport gateway in front of the
+SDK's ordinary Client-Server requests. Before returning a successful sync
+response to the SDK, it commits raw timeline events and a batch ledger in the
+agent's separate SQLx database. Limited timelines are backfilled through public
+history pagination; the response delivered to the SDK is unchanged. The gateway
+does not implement encryption or interpret chat text.
+
+After SDK processing commits its own state, the Runner decrypts retained events
+through SDK room APIs and moves each unique event to ready, pending-decryption,
+or a protocol-only state. Only then does it commit the application checkpoint.
+Each sync explicitly uses that checkpoint, even when the SDK store has advanced.
+Retained ciphertext allows recovery when the SDK suppresses an already-seen
+batch. Missing-key attempts are bounded between SDK room-key notifications;
+notifications and restarts retry against the persisted keys. Native verification
+messages remain protocol events and do not become social input.
+
+The prototype exercises abrupt exits after journal commit, SDK processing,
+decryption, inbox persistence, and application checkpoint commit. These tests
+establish the pinned implementation's process-crash behavior, not a universal
+power-loss guarantee or an atomic transaction across SDK and application stores.
+
 
 ## 7. Inbox, Attention, and Thinking Loop
 

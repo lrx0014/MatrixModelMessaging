@@ -1992,9 +1992,14 @@ name = "m3-agent"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "axum",
  "clap",
+ "futures-util",
  "m3-storage",
  "matrix-sdk",
+ "reqwest",
+ "serde",
+ "serde_json",
  "sqlx",
  "tempfile",
  "tokio",
@@ -2017,8 +2022,13 @@ dependencies = [
  "anyhow",
  "axum",
  "clap",
+ "m3-storage",
+ "reqwest",
+ "ruma",
  "serde",
  "serde_json",
+ "sqlx",
+ "tempfile",
  "tokio",
  "tower",
  "tracing",
@@ -3059,6 +3069,8 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "rustls-platform-verifier",
+ "serde",
+ "serde_json",
  "sync_wrapper",
  "tokio",
  "tokio-rustls",
@@ -3115,11 +3127,25 @@ dependencies = [
  "assign",
  "js_int",
  "js_option",
+ "ruma-appservice-api",
  "ruma-client-api",
  "ruma-common",
  "ruma-events",
  "ruma-html",
  "web-time",
+]
+
+[[package]]
+name = "ruma-appservice-api"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97235ed48b607dbe12a7871ce0e9223a2b5a2cff4523bd68985d69b613c5b981"
+dependencies = [
+ "js_int",
+ "ruma-common",
+ "ruma-events",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -4890,6 +4916,7 @@ dependencies = [
  "clap",
  "m3-control",
  "m3-storage",
+ "reqwest",
  "serde_json",
  "sqlx",
  "tempfile",

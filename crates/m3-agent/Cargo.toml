@@ -8,8 +8,13 @@ publish.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+futures-util.workspace = true
 clap.workspace = true
 matrix-sdk.workspace = true
+axum.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 m3-storage = { path = "../m3-storage" }
 sqlx.workspace = true
 tempfile.workspace = true
