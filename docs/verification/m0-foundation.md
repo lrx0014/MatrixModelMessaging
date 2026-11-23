@@ -8,8 +8,8 @@ Status: Complete
 The implementation is based on `76d476048f7a3b0bddfa28b1e9e695519a3501d6`.
 Clean-checkout validation first used a local-only candidate snapshot,
 `258e49e1258eaf467773e2e0ee0a1d81eeb82fd0`, cloned under ignored `.local/`.
-The committed implementation revision and its clean-checkout confirmation are
-recorded below after the implementation commit. Nothing was pushed.
+Committed implementation revision: `6b6c9722070b85ae0ca4219c32a21783e58f89e4`.
+Its clean-checkout confirmation is recorded below. Nothing was pushed.
 All 37 build/test input files match the delivered working tree; the
 SHA-256 over sorted relative paths plus NUL-delimited contents is
 `5020dc308ba9268e771232430793a7405fba0d2c6eac1e47e228180dfd627b43`. This covers manifests/lockfiles, toolchain/config,
@@ -18,7 +18,7 @@ Documentation is updated after validation and is outside this build-input digest
 Image identities are recorded below.
 
 [Initial-slice evidence](m0-initial-slice.md) preserves the earlier checks and
-lockfile identity. It does not describe the current remaining work.
+lockfile identity. The present report supersedes it for final acceptance.
 
 Current application lockfile SHA-256:
 `e4d4cf314f21e1830bd81f2b5acef2fac0f3cb1a4000851e28fde4a42af690ed`.
@@ -153,6 +153,25 @@ It runs npm clean installation/typechecking and a locked offline release Cargo
 workspace build, then executes all three version entry points and Runner
 storage smoke. Dependency/build caches are reused; no generated project files
 or local databases are supplied by the original working directory.
+
+The final committed revision `6b6c9722070b85ae0ca4219c32a21783e58f89e4`
+was fetched into that clean, disposable clone and checked again. These commands
+passed, with no tracked or untracked non-ignored changes before or after:
+
+```sh
+npm ci --prefix web --ignore-scripts --offline
+npm run typecheck --prefix web
+cargo build --workspace --release --locked --offline
+m3-control --version
+m3-agent --version
+m3 --version
+m3-agent storage-smoke
+```
+
+The binary commands use the resulting release binaries. The host dependency
+and target caches are reused via `CARGO_TARGET_DIR`; no network is required.
+The following evidence-only commit updates documentation and does not change
+any build/test input or generated artifact.
 
 ### Linux images and CI entry point (M0-A3/A4)
 

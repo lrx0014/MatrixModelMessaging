@@ -310,7 +310,8 @@ This is a cross-milestone summary, not a replacement for individual gates. Each 
 
 ## 12. Evidence and Completion Record
 
-M0 completed on 2026-11-23. All M0-I1–I8 and M0-A1–A5 pass. The
+M0 completed on 2026-11-23. All M0-I1–I8 and M0-A1–A5 pass.
+Tested implementation commit: `6b6c9722070b85ae0ca4219c32a21783e58f89e4`. The
 [M0 report](verification/m0-foundation.md) records the tested revision and build
 input digest, macOS arm64/native Linux arm64/emulated Linux amd64 environments,
 pinned versions, commands, and results. No active issue blocks the M0 gate.
