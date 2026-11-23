@@ -3,7 +3,7 @@
 Version: v1.0  
 Status: Development checklist  
 Baseline: [Project Proposal](proposal.md) and [Design and Implementation Plan](design.md), v1.0  
-Last updated: 2026-11-22
+Last updated: 2026-11-23
 
 ## 1. Progress Rules
 
@@ -27,11 +27,14 @@ For each milestone, record the tested commit, exact commands or manual steps, en
 - [x] English v1.0 design specifies the Rust stack and current product decisions.
 - [x] Development milestones and acceptance checklists are defined in this document.
 
-These completed documentation items do not imply implemented or validated software. At checklist creation, the repository has no Rust application workspace, running prototype, or recorded implementation-test results.
+The M0 Rust foundation is complete. The workspace, minimal binaries, storage,
+contracts, disposable homeserver, CI checks, and both Linux architecture images
+have passed the [M0 acceptance checks](verification/m0-foundation.md).
+No Matrix social runtime is implemented yet.
 
 | ID | Milestone | Design phase | Depends on | Status | Completed |
 | --- | --- | --- | --- | --- | --- |
-| M0 | Reproducible Rust foundation | Phase 0, setup | Documentation baseline | Not started | — |
+| M0 | Reproducible Rust foundation | Phase 0, setup | Documentation baseline | Complete | 2026-11-23 |
 | M1 | Independent encrypted Matrix clients | Phase 0, protocol validation | M0 | Not started | — |
 | M2 | Persistent identities and managed containers | Phase 1 | M1 | Not started | — |
 | M3 | Natural-language social loop and manual brake | Phase 2 | M2 | Not started | — |
@@ -57,24 +60,32 @@ Independent frontend work can proceed after the management contract exists, and 
 
 ### Implementation checklist
 
-- [ ] M0-I1: Create the Cargo workspace, pinned stable `rust-toolchain.toml`, workspace edition/MSRV, and committed `Cargo.lock`.
-- [ ] M0-I2: Add minimal `m3-control`, `m3-agent`, and `m3` CLI entry points, creating shared crates only as needed.
-- [ ] M0-I3: Resolve compatible Matrix SDK, Ruma, Tokio/Axum, SQLx, and SQLite native dependencies; document selected features and licenses.
-- [ ] M0-I4: Add initial Control/agent migrations and SQLx metadata preparation/checking through `cargo xtask`.
-- [ ] M0-I5: Export a minimal management OpenAPI contract with utoipa and set up frontend type generation without requiring a complete UI.
-- [ ] M0-I6: Provide disposable Synapse/AS test configuration and reset instructions, with no private Admin API required by M3.
-- [ ] M0-I7: Add CI for formatting, Clippy, Cargo tests, metadata/contract drift checks, and both Linux architecture builds.
-- [ ] M0-I8: Add basic Control/Runner container build targets and document development commands.
+- [x] M0-I1: Create the Cargo workspace, pinned stable `rust-toolchain.toml`, workspace edition/MSRV, and committed `Cargo.lock`.
+- [x] M0-I2: Add minimal `m3-control`, `m3-agent`, and `m3` CLI entry points, creating shared crates only as needed.
+- [x] M0-I3: Resolve compatible Matrix SDK, Ruma, Tokio/Axum, SQLx, and SQLite native dependencies; document selected features and licenses.
+- [x] M0-I4: Add initial Control/agent migrations and SQLx metadata preparation/checking through `cargo xtask`.
+- [x] M0-I5: Export a minimal management OpenAPI contract with utoipa and set up frontend type generation without requiring a complete UI.
+- [x] M0-I6: Provide disposable Synapse/AS test configuration and reset instructions, with no private Admin API required by M3.
+- [x] M0-I7: Add CI for formatting, Clippy, Cargo tests, metadata/contract drift checks, and both Linux architecture builds.
+- [x] M0-I8: Add basic Control/Runner container build targets and document development commands.
 
 ### Acceptance checklist
 
-- [ ] M0-A1: A clean checkout builds and runs the three minimal entry points using the pinned toolchain and locked dependencies.
-- [ ] M0-A2: The same process can initialize a Matrix SDK store and a separate SQLx database, with FTS5 word and trigram queries working in the release build.
-- [ ] M0-A3: Linux `amd64` and `arm64` builds succeed with compatible SQLite linkage; smoke execution is recorded on each target or through a documented emulator.
-- [ ] M0-A4: CI detects intentionally stale OpenAPI/TypeScript artifacts or SQLx metadata, and passes after regeneration.
-- [ ] M0-A5: The disposable homeserver environment starts and can be reset using documented steps.
+- [x] M0-A1: A clean checkout builds and runs the three minimal entry points using the pinned toolchain and locked dependencies.
+- [x] M0-A2: The same process can initialize a Matrix SDK store and a separate SQLx database, with FTS5 word and trigram queries working in the release build.
+- [x] M0-A3: Linux `amd64` and `arm64` builds succeed with compatible SQLite linkage; smoke execution is recorded on each target or through a documented emulator.
+- [x] M0-A4: CI detects intentionally stale OpenAPI/TypeScript artifacts or SQLx metadata, and passes after regeneration.
+- [x] M0-A5: The disposable homeserver environment starts and can be reset using documented steps.
 
-**Evidence:** `docs/verification/m0-foundation.md`, with toolchain/crate versions, dependency-resolution notes, target architecture results, and build commands.
+**Evidence:** [M0 foundation verification](verification/m0-foundation.md), with
+pinned inputs, tested revision, reproducible commands, native SQLite linkage,
+clean-checkout checks, and final image identities.
+
+**Status:** Complete on 2026-11-23. All implementation and acceptance items pass.
+The unified CI entry point passes locally and in native Linux arm64, including
+intentional artifact drift. Both Linux final images pass storage, runtime,
+HTTP/CLI, and shutdown checks; amd64 execution uses Docker emulation.
+Hosted GitHub Actions execution has not been run.
 
 **Gate:** A reproducible application foundation exists. Successful compilation alone does not establish Matrix or encryption compatibility.
 
@@ -299,7 +310,14 @@ This is a cross-milestone summary, not a replacement for individual gates. Each 
 
 ## 12. Evidence and Completion Record
 
-Use this format when a milestone is completed or reopened. No implementation milestone has a completion record yet.
+M0 completed on 2026-11-23. All M0-I1–I8 and M0-A1–A5 pass. The
+[M0 report](verification/m0-foundation.md) records the tested revision and build
+input digest, macOS arm64/native Linux arm64/emulated Linux amd64 environments,
+pinned versions, commands, and results. No active issue blocks the M0 gate.
+Native amd64-host and hosted Actions runs remain unclaimed; Matrix encryption
+and recovery remain M1 work.
+
+Use this format when a milestone is completed or reopened.
 
 ```text
 Milestone:
@@ -318,12 +336,18 @@ For real-model experiments, record the prompt/persona/configuration revision and
 
 ## 13. Blockers and Next Work
 
-No implementation blocker has been verified yet. This does not imply that dependency, protocol, or recovery risks have been resolved.
+No active implementation blocker is recorded. The initial native SQLite
+version conflict was resolved by the compatible pins documented in
+[M0 evidence](verification/m0-foundation.md) and [J001](journey.md#j001--2026-11-23--select-sdk-and-sqlx-by-their-shared-native-sqlite-dependency).
+Protocol and recovery risks remain unverified.
 
-**Next milestone:** M0, starting with the minimal Cargo workspace and dependency compatibility/build checks. M1 then resolves the highest-impact assumptions about AS-created encrypted clients before feature development expands.
+**Next milestone:** M1 — independent encrypted Matrix clients. Begin controlled
+AS account/session provisioning and authenticated transaction handling, then
+validate verification, encrypted messaging, and persistent recovery against a
+real homeserver and human client before expanding product features.
 
 | Item | Milestone | Concrete obstacle or pending decision | Evidence | Next action |
 | --- | --- | --- | --- | --- |
-| — | — | No recorded blockers | — | Begin M0 |
+| — | M1 | No active implementation blocker; protocol gates remain unverified | [M0 evidence](verification/m0-foundation.md) | Begin M1-I1 and controlled provisioning validation |
 
 Keep this table focused on actionable obstacles. General technical validation remains in design Section 16 and the milestone checklists rather than being mislabeled as an observed failure.

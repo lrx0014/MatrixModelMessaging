@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT global_frozen FROM instance_state WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "global_frozen",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "instance_state",
+            "name": "global_frozen"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fd0118fbcdd81581997633d9fdc1e86cbf89f10a2df2b04afcf0218abcb6bbed"
+}

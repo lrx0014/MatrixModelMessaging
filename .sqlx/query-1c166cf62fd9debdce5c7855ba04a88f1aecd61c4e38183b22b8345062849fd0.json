@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT position FROM checkpoints WHERE stream = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "position",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "checkpoints",
+            "name": "position"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1c166cf62fd9debdce5c7855ba04a88f1aecd61c4e38183b22b8345062849fd0"
+}

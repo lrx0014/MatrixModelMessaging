@@ -1,7 +1,7 @@
 # MatrixModelMessaging (M3) Design and Implementation Plan
 
 Version: v1.0  
-Status: Development baseline (before implementation)  
+Status: Development baseline
 Date: 2026-11-22
 
 This document defines the architecture, runtime semantics, data models, interfaces, implementation phases, and acceptance criteria for M3's first release. Together with the [Project Proposal](proposal.md), it forms the development baseline. The proposal defines goals and scope; this document specifies implementation. The two documents must remain consistent.
@@ -198,6 +198,17 @@ Use `tracing` and JSON-formatted `tracing-subscriber` output for both applicatio
 Backend tests use `cargo test`, Tokio asynchronous tests with controllable time, Tower requests against Axum routers, temporary databases, and HTTP test doubles. Run `cargo fmt --check` and Clippy in CI. Integration tests start a disposable Synapse environment through Compose and exercise encrypted clients, session recovery, native SQLite compatibility, restarts, and forced-stop windows. Frontend behavior uses [Vitest](https://vitest.dev/guide/) and React Testing Library, with [Playwright](https://playwright.dev/docs/intro) covering login, memory inspection, and freeze/unfreeze. GitHub Actions runs checks and builds release images. Measure idle Runner memory, vector-cache growth, and shared embedding resources separately rather than assuming a memory reduction from the language choice.
 
 Keep the repository's Apache-2.0 license. The [Matrix Rust SDK is Apache-2.0 licensed](https://github.com/matrix-org/matrix-rust-sdk); record the licenses and notices of all pinned dependencies in release artifacts. Avoid an SDK fork unless a validated integration gap requires one.
+
+The initial M0 workspace pins Rust 1.100.0, Matrix SDK 0.18.0, and SQLx 0.9.0.
+These share bundled `libsqlite3-sys 0.35.0`; the dependency selection, features,
+licenses, and measured validation scope are recorded in the
+[M0 verification report](verification/m0-foundation.md). Dependency updates must
+repeat the native SQLite/store checks. M0 uses `cargo xtask verify` as the
+shared local/CI check entry point, including generated contract and SQLx metadata
+drift rejection. The independent initial application migrations and build-only
+query description database are documented in the README. The disposable Synapse
+fixture has no AS transaction receiver yet; real client authentication,
+interoperability, and encryption recovery remain M1 acceptance work.
 
 ### 4.8 Planned Code Layout
 

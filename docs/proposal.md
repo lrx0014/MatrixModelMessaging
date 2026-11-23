@@ -1,7 +1,7 @@
 # MatrixModelMessaging (M3) Project Proposal
 
 Version: v1.0  
-Status: Development baseline (before implementation)  
+Status: Development baseline
 Date: 2026-11-22
 
 This document defines M3's vision, product principles, scope, and deliverables. The [Design and Implementation Plan](design.md) specifies the architecture, runtime semantics, data models, and development acceptance criteria. Together, these documents form the development baseline for the first release.

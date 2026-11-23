@@ -1,0 +1,62 @@
+name: Rust foundation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SQLX_OFFLINE: "true"
+  CARGO_BUILD_JOBS: "1"
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Install native build prerequisites and pinned compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes build-essential cmake pkg-config
+          rustup show active-toolchain
+      - run: npm ci --prefix web --ignore-scripts
+      - name: Deterministic checks and deliberately stale artifact rejection
+        run: cargo xtask verify
+      - run: cargo build --workspace --release --locked
+      - name: Execute native release smoke checks
+        run: |
+          target/release/m3-control --version
+          target/release/m3 --version
+          target/release/m3-agent storage-smoke
+      - name: Build and execute final non-root images
+        run: |
+          docker buildx build --platform linux/${{ matrix.arch }} --file deploy/Dockerfile --target agent --tag m3-agent:m0 --load .
+          docker buildx build --platform linux/${{ matrix.arch }} --file deploy/Dockerfile --target control --tag m3-control:m0 --load .
+          docker run --rm m3-agent:m0 storage-smoke
+          docker run --rm m3-control:m0 --version
+          docker run --rm --entrypoint m3 m3-control:m0 --version
+
+  synapse:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: cargo xtask synapse up
+      - run: cargo xtask synapse smoke
+      - run: cargo xtask synapse reset
+      - run: cargo xtask synapse smoke
+      - if: always()
+        run: cargo xtask synapse down

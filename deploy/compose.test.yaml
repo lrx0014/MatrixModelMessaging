@@ -1,0 +1,27 @@
+# Disposable M0 fixtures only. Do not point these commands at a real homeserver.
+name: m3-m0
+services:
+  init:
+    image: ghcr.io/element-hq/synapse:v1.165.0@sha256:673b4223c81a7634fd07d832b939a58f97081cfdaae7cdd2d1664cdcf7611b62
+    user: "0:0"
+    entrypoint: ["python", "/fixtures/init.py"]
+    volumes:
+      - synapse-data:/data
+      - ../tests/integration/synapse:/fixtures:ro
+  synapse:
+    image: ghcr.io/element-hq/synapse:v1.165.0@sha256:673b4223c81a7634fd07d832b939a58f97081cfdaae7cdd2d1664cdcf7611b62
+    user: "991:991"
+    environment:
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    ports:
+      - "127.0.0.1:18008:8008"
+    volumes:
+      - synapse-data:/data
+      - ../tests/integration/synapse:/fixtures:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8008/health', timeout=5)"]
+      interval: 2s
+      timeout: 6s
+      retries: 30
+volumes:
+  synapse-data:

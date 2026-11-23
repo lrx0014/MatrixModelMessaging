@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO checkpoints (stream, position, committed_at) VALUES (?, ?, ?) ON CONFLICT(stream) DO UPDATE SET position = excluded.position, committed_at = excluded.committed_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "a6942008179dab80de4198ae6dc7abee70a759e7b9e80246158b5aaa4347c9f8"
+}

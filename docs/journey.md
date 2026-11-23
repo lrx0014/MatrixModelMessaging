@@ -58,4 +58,63 @@ For temporary decisions, include a concrete revisit condition or follow-up item.
 
 ## Events
 
-No development events recorded yet.
+### J001 — 2026-11-23 — Select SDK and SQLx by their shared native SQLite dependency
+
+Status: Resolved for the initial foundation; upgrades require revalidation
+Related milestone: M0
+
+Cargo rejected Matrix SDK 0.19.1 with SQLx 0.9.0 because their required
+`libsqlite3-sys` ranges do not overlap. Both crates link SQLite into the Runner,
+and Cargo correctly permits only one dependency with `links = "sqlite3"`.
+Selecting each library's newest release independently is therefore insufficient.
+
+The foundation pins SDK 0.18.0 and SQLx 0.9.0, resolved to one bundled
+`libsqlite3-sys 0.35.0`. No upstream fork or native-library workaround is used.
+See the [M0 verification report](verification/m0-foundation.md) for the graph,
+features, checks, and limitations. Revisit the SDK pin when newer SDK/SQLx
+releases have overlapping SQLite requirements; rerun store/FTS checks and all
+applicable M1 interoperability/recovery gates before claiming compatibility.
+
+
+### J002 — 2026-11-23 — Prepare checked SQL across independent application databases
+
+Status: Resolved for the initial schemas
+Related milestone: M0
+
+The storage crate contains checked Control and agent queries, while SQLx's macro
+compilation uses one `DATABASE_URL`. Application databases must retain separate
+migration histories and must never receive SDK migrations.
+
+`cargo xtask sqlx` first exercises the real Control/agent migrators against two
+separate temporary databases. It then applies their embedded SQL to a third,
+build-only description database and regenerates all checked-query metadata.
+That database is never used at runtime; application opens select one migrator.
+Generation compares all metadata files, including obsolete descriptions, and the
+CI negative test proves drift rejection. The initial table names are distinct.
+
+If future Control and agent schemas need conflicting table definitions, revisit
+the preparation boundary (for example, separate checked-query compilation
+features) before merging those definitions into one description database. Do not
+solve a tooling collision by combining runtime databases or migration histories.
+See [M0 evidence](verification/m0-foundation.md) and the README for commands.
+
+
+### J003 — 2026-11-23 — Serialize compilation on the small Linux builder
+
+Status: Resolved
+Related milestone: M0
+
+The Docker builder exposed 12 CPUs but only about 8 GiB memory. A default
+parallel release build reached overlapping SDK/application compilation and
+failed with `ResourceExhausted: cannot allocate memory`; a concurrent build
+request was canceled. Compilation concurrency was unsuitable for this builder.
+
+Docker build stages and CI now set `CARGO_BUILD_JOBS=1`. Both architecture image builds, their runtime smoke checks (amd64 under
+emulation), and the complete native Linux arm64 CI verification entry point
+pass with that setting. The shared Cargo target cache also uses a locked BuildKit mount so
+independent build requests cannot compile into it concurrently.
+
+This is a development/build setting, not a runtime resource or social usage
+limit. Keep failed/canceled attempts separate from passing architecture evidence.
+Revisit the job count only after measuring the compiler's memory peaks on a
+larger builder. See [M0 evidence](verification/m0-foundation.md) for results.
