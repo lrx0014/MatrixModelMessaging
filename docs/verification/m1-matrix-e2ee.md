@@ -1,12 +1,14 @@
 # M1 Matrix and E2EE Verification
 
 Date: 2026-11-23
-Status: Final image acceptance in progress
+Status: Complete; M1-I1–I7 and M1-A1–A7 pass
 
 ## Revision and environment
 
-The candidate is based on M0 evidence commit 438be96. The implementation commit,
-final image identities, and acceptance outcomes are recorded at completion.
+Tested implementation commit: `2a6b9750b70f124a69ce19eb490b2ce473e19d73`,
+based on M0 evidence commit `438be96`. Host checks and final image builds use
+the implementation sources in that commit; subsequent changes only record
+acceptance evidence and milestone status.
 No remote workflow execution or publication is claimed.
 
 Host and compiler match the M0 environment: macOS 27.0.1 on Apple arm64,
@@ -127,7 +129,10 @@ The following commands completed successfully against the candidate sources:
 
 The verification command passed all six Rust tests, formatting, Clippy with
 warnings denied, TypeScript checks, and contract/SQLx drift rejection and
-restoration. The locked release build passed. The Matrix smoke completed real
+restoration. The locked release build passed. A clean, detached local clone of the tested
+commit also passed `cargo build --workspace --release --locked --offline`
+and the resulting release `m3-agent storage-smoke` (SQLite 3.50.2), using
+the existing dependency/build cache. The Matrix smoke completed real
 AS checks and every protocol/recovery scenario listed above. Documentation
 relative links and workflow YAML parsing also passed. Hosted workflow jobs were
 not executed.
@@ -177,7 +182,39 @@ persistent verified status. See J005 in the journey.
 
 ## Image results
 
-Final architecture identities and complete encrypted-client results are pending.
+Both final non-root prototype images pass SDK state/crypto initialization,
+SQLx/FTS5 coexistence, all four messaging modes, peer-started SAS verification,
+persistent device restart, delayed real keys, and all five abrupt-exit recovery
+boundaries. Each architecture uses its own pair of identities and SDK volume.
+
+| Architecture | Execution | Result | Local image identity |
+| --- | --- | --- | --- |
+| arm64 | Native Docker Linux VM | Passed | `sha256:7e2d7de40b9ef6154fde53e4a02e59633cc67338d1dd81388d216634b51e5e60` |
+| amd64 | Docker Desktop emulation | Passed | `sha256:fc1a3b2b16728f81e48b1c0bf3a29abba29e51f636b187cb18af550d05559f92` |
+
+Actual commands executed (sequentially, with build logs under ignored .local/m1):
+
+    docker buildx build --platform linux/arm64 --file deploy/Dockerfile --target agent --tag m3-agent:m1-arm64 --load .
+    docker buildx build --platform linux/amd64 --file deploy/Dockerfile --target agent --tag m3-agent:m1-amd64 --load .
+    python3 tests/integration/matrix_images.py --arch arm64
+    python3 tests/integration/matrix_images.py --arch amd64
+
+The documented `cargo xtask matrix images --arch ARCH` entry point delegates to
+that same harness. Both executions returned success and wrote passing result
+records; SDK fingerprints remained stable across their internal restarts.
+The local fixture remains available for inspection. Protocol clients and crash
+children have exited; only the disposable Synapse and Element services remain.
+
+| Acceptance | Result and evidence |
+| --- | --- |
+| M1-A1 | SDK pair and real Element group/DM replies, both wire encryption modes |
+| M1-A2 | SDK SAS and human Element comparison; persisted verified status |
+| M1-A3 | Original devices/stores, old ciphertext decryption and new encrypted sends |
+| M1-A4 | Real delayed keys, persistent diagnostic state, one ready event |
+| M1-A5 | Five actual process exits and exact recovery, host and both images |
+| M1-A6 | Authenticated AS redelivery plus sync replay/event-ID deduplication |
+| M1-A7 | Both final images pass the complete SDK/SQLx encrypted-client scenario |
+
 
 ## Limits and remaining product work
 

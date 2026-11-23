@@ -30,13 +30,15 @@ For each milestone, record the tested commit, exact commands or manual steps, en
 The M0 Rust foundation is complete. The workspace, minimal binaries, storage,
 contracts, disposable homeserver, CI checks, and both Linux architecture images
 have passed the [M0 acceptance checks](verification/m0-foundation.md).
-M1 now has a controlled Matrix/E2EE prototype; final architecture acceptance is
-in progress. No model-driven social runtime is implemented yet.
+M1 is complete: the controlled Matrix/E2EE prototype passes host, real human
+Element, and both final Linux image checks documented in the
+[M1 report](verification/m1-matrix-e2ee.md). No model-driven social runtime is
+implemented yet.
 
 | ID | Milestone | Design phase | Depends on | Status | Completed |
 | --- | --- | --- | --- | --- | --- |
 | M0 | Reproducible Rust foundation | Phase 0, setup | Documentation baseline | Complete | 2026-11-23 |
-| M1 | Independent encrypted Matrix clients | Phase 0, protocol validation | M0 | In progress | — |
+| M1 | Independent encrypted Matrix clients | Phase 0, protocol validation | M0 | Complete | 2026-11-23 |
 | M2 | Persistent identities and managed containers | Phase 1 | M1 | Not started | — |
 | M3 | Natural-language social loop and manual brake | Phase 2 | M2 | Not started | — |
 | M4 | Personal long-term memory and growth | Phase 3 | M3 | Not started | — |
@@ -112,14 +114,15 @@ Hosted GitHub Actions execution has not been run.
 - [x] M1-A4: A missing-key event remains diagnosable and is not interpreted by the model; when a key arrives, it enters processing once.
 - [x] M1-A5: Fault injection around decryption, inbox persistence, and cursor advancement demonstrates recovery without lost input or duplicate effective delivery.
 - [x] M1-A6: AS transaction redelivery and client-sync replay do not create duplicate chat processing.
-- [ ] M1-A7: The final prototype image exercises SDK and SQLx stores on both target architectures; record encrypted-client smoke results.
+- [x] M1-A7: The final prototype image exercises SDK and SQLx stores on both target architectures; record encrypted-client smoke results.
 
 **Evidence:** [M1 Matrix/E2EE verification](verification/m1-matrix-e2ee.md),
 with reproducible setup, human Element comparison, public device fingerprints,
 real delayed-key and process-crash scenarios, and the tested compatibility scope.
 
-**Status:** All implementation items and host/human acceptance checks pass.
-Final arm64/amd64 prototype image acceptance (M1-A7) is in progress.
+**Status:** Complete on 2026-11-23. All M1-I1–I7 and M1-A1–A7 pass.
+The final images pass complete encrypted-client recovery checks on native
+Linux arm64 and emulated Linux amd64. Hosted Actions remains unrun.
 
 **Gate:** The selected Rust client/AS architecture works with independent persistent encrypted identities. Resolve credential or recovery failures before proceeding; do not substitute shared keys, global AS tokens in every container, or disabled encryption.
 
@@ -324,6 +327,14 @@ pinned versions, commands, and results. No active issue blocks the M0 gate.
 Native amd64-host and hosted Actions runs remain unclaimed; Matrix encryption
 and recovery remain M1 work.
 
+M1 completed on 2026-11-23. All M1-I1–I7 and M1-A1–A7 pass.
+Tested implementation commit: `2a6b9750b70f124a69ce19eb490b2ce473e19d73`.
+The [M1 report](verification/m1-matrix-e2ee.md) records real AS provisioning,
+scoped sessions, SDK and human Element verification, encrypted restart,
+delayed-key recovery, five process-crash boundaries, and both final image
+identities. No active issue blocks M1. Native amd64, MAS/OIDC, other clients,
+and hosted Actions remain unclaimed. Managed lifecycle/backup is M2 work.
+
 Use this format when a milestone is completed or reopened.
 
 ```text
@@ -346,14 +357,14 @@ For real-model experiments, record the prompt/persona/configuration revision and
 No active implementation blocker is recorded. The initial native SQLite
 version conflict was resolved by the compatible pins documented in
 [M0 evidence](verification/m0-foundation.md) and [J001](journey.md#j001--2026-11-23--select-sdk-and-sqlx-by-their-shared-native-sqlite-dependency).
-Protocol and recovery risks remain unverified.
+The M1 report records the verified protocol and recovery scope; later lifecycle
+and backup guarantees still require their own milestone acceptance.
 
-**Current work:** Complete M1-A7 by running the complete encrypted-client and
-recovery scenario inside the final images on both architectures. M2 follows
-only after that protocol gate passes.
+**Next work:** Begin M2 persistent identity and managed-container implementation
+from the validated M1 protocol foundation. M2 has not started.
 
 | Item | Milestone | Concrete obstacle or pending decision | Evidence | Next action |
 | --- | --- | --- | --- | --- |
-| — | M1 | No active blocker; final image acceptance is running | [M1 evidence](verification/m1-matrix-e2ee.md) | Complete M1-A7 |
+| — | M2 | No active blocker; implementation has not started | [M1 evidence](verification/m1-matrix-e2ee.md) | Start M2-I1 and provisioning recovery design |
 
 Keep this table focused on actionable obstacles. General technical validation remains in design Section 16 and the milestone checklists rather than being mislabeled as an observed failure.
